@@ -1,0 +1,1 @@
+cap = cv2.VideoCapture("C:\\Users\\Barrongo\\Pictures\\THESIS\\Videos\\video0.mp4")
