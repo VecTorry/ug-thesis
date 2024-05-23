@@ -74,6 +74,7 @@ options = vision.PoseLandmarkerOptions(
 with vision.PoseLandmarker.create_from_options(options) as landmarker:
     # Use OpenCV’s VideoCapture to start capturing from the webcam.
     cap = cv2.VideoCapture("C:\\Users\\Barrongo\\Pictures\\THESIS\\Videos\\video2.mp4")
+    # cap = cv2.VideoCapture(0)
 
     # Create a loop to read the latest frame from the camera using VideoCapture#read()
     while cap.isOpened():

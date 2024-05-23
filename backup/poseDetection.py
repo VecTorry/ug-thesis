@@ -5,8 +5,8 @@ import numpy as np
 mp_pose = mp.solutions.pose
 mp_draw = mp.solutions.drawing_utils
 pose = mp_pose.Pose()
-# cap = cv2.VideoCapture("C:\\Users\\Barrongo\\Pictures\\THESIS\\Videos\\video0.mp4")
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("E:\\!DLSU School Utilities\\College\\Thesis\\THESIS\\Videos\\video0.mp4")
+# cap = cv2.VideoCapture(0)
 
 while True:
     ret, img = cap.read()
