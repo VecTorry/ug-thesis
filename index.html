@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posture Analysis</title>
+    <style>
+        video
+        {
+            width: 100%;
+            max-width: 850px;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Webcam Feed</h1>
+    <video id="video" autoplay></video>
+
+    <script>
+        // Access the webcam
+        const video = document.getElementById('video');
+
+        // Request access to the webcam
+        navigator.mediaDevices.getUser Media({ video: true })
+            .then(stream =>
+            {
+                video.srcObject = stream;
+            })
+            .catch(err =>
+            {
+                console.error("Error accessing the webcam: ", err);
+            });
+    </script>
+</body>
+</html>
