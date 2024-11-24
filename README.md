@@ -1,6 +1,6 @@
 "# ug-thesis"
 
-Commit: "Original Teachale Machine code snippet integrated"
+Commit: "Original Teachable Machine code snippet integrated"
 
 CHANGELOG:
 
