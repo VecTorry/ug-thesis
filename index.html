@@ -13,9 +13,14 @@
             background-color: #f4f4f4;
         }
         video {
-            width: 100%;
-            max-width: 850px;
+            width: 200px; /* Set a fixed width */
+            height: 200px; /* Set a fixed height */
             border: 1px solid black;
+        }
+        canvas {
+            position: absolute; /* Position the canvas on top of the video */
+            width: 200px; /* Match the video width */
+            height: 200px; /* Match the video height */
         }
         button {
             margin: 10px;
@@ -30,115 +35,104 @@
         button:hover {
             background-color: #0056b3;
         }
-        #prediction {
+        #label-container {
             margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #ffffff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            width: 300px; /* Set a fixed width for better alignment */
+            font-size: 18px;
         }
     </style>
-    <!-- Include TensorFlow.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 </head>
 <body>
     <h1>Webcam Feed</h1>
     <video id="video" autoplay></video>
-    <canvas id="canvas" style="display: none;"></canvas>
+    <canvas id="canvas"></canvas>
     <button id="start-button">Open Camera</button>
     <button id="close-button" style="display: none;">Close Camera</button>
-    <div id="prediction">Predicted Class: None</div> <!-- Initial text for prediction -->
-</body>
-<script>
-    const video = document.getElementById('video');
-    const startButton = document.getElementById('start-button');
-    const closeButton = document.getElementById('close-button');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    let model;
-    let stream;
+    <div id="label-container"></div>
 
-    async function loadModel() {
-        model = await tf.loadLayersModel('model.json');
-        console.log("Model loaded successfully");
-    }
+    <!-- Include TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
+    <script type="text/javascript">
+        const URL = "./my_model/"; // Update with your model path
+        let model, webcam, ctx, labelContainer, maxPredictions;
 
-    async function setupCamera() {
-        stream = await navigator.mediaDevices.getUserMedia({video: true});
-        video.srcObject = stream;
-        return new Promise((resolve) => {
-            video.onloadedmetadata = () => {
-                resolve(video);
-            };
-        });
-    }
+        async function init() {
+            const modelURL = "model.json";
+            const metadataURL = "metadata.json";
 
-    async function startCamera() {
-        await setupCamera();
-        video.play();
-        await loadModel();
-        detectPose();
-        startButton.style.display = 'none';
-        closeButton.style.display = 'inline';
-    }
+            // Load the model and metadata
+            model = await tmPose.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
 
-    function closeCamera() {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
+            console.log("Model loaded successfully");
+
+            // Setup webcam
+            const size = 200;
+            const flip = true; // whether to flip the webcam
+            webcam = new tmPose.Webcam(size, size, flip); // width, height, flip
+            await webcam.setup(); // request access to the webcam
+            await webcam.play(); // Start playing the webcam
+            window.requestAnimationFrame(loop);
+
+            // Set up the canvas
+            const canvas = document.getElementById("canvas");
+            canvas.width = size; 
+            canvas.height = size;
+            ctx = canvas.getContext("2d");
+            labelContainer = document.getElementById("label-container");
+            for (let i = 0; i < maxPredictions; i++) { // and class labels
+                labelContainer.appendChild(document.createElement("div"));
+            }
+
+            console.log("Webcam setup completed");
         }
-        video.srcObject = null;
-        startButton.style.display = 'inline';
-        closeButton.style.display = 'none';
-    }
-    const inputHeight = 69; // Define input height
-    const inputWidth = 23;  // Define input width
-    
-    async function detectPose() {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
 
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        let imgTensor = tf.browser.fromPixels(canvas);
+        async function loop() {
+            webcam.update(); // update the webcam frame
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
 
-        // Resize the image tensor to the expected input size
-        imgTensor = tf.image.resizeBilinear(imgTensor, [inputHeight, inputWidth]);
+        async function predict() {
+            const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
+            const prediction = await model.predict(posenetOutput);
 
-        // Normalize the image tensor
-        imgTensor = imgTensor.div(255.0); // Scale pixel values to [0, 1]
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                labelContainer.childNodes[i].innerHTML = classPrediction;
+            }
 
-        // Flatten the image tensor to match the model input shape
-        imgTensor = imgTensor.reshape([-1, 4761]); // Flatten to 4761
+            // Draw the poses
+            drawPose(pose);
+        }
 
-        // Pad the input tensor to reach the desired size of 14739
-        const paddedTensor = tf.pad(imgTensor, [[0, 0], [0, 14739 - 4761]]);
+        function drawPose(pose) {
+            if (webcam.canvas) {
+                ctx.drawImage(webcam.canvas, 0, 0);
+                // Draw the keypoints and skeleton
+                if (pose) {
+                    const minPartConfidence = 0.5;
+                    tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx);
+                    tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx);
+                }
+            }
+        }
 
-        // Make predictions using the padded tensor
-        const predictions = await model.predict(paddedTensor).data();
-        
-        const classNames = ['Standing', 'T-Pose'];
-        const results = Array.from(predictions).map((score, index) => ({
-            className: classNames[index],
-            score: score
-        }));
-
-        const maxScore = Math.max(...results.map(result => result.score));
-        const predictedClass = results.find(result => result.score === maxScore).className;
-
-        // Update the UI with the predicted class and confidence score
-        const predictionElement = document.getElementById('prediction');
-        predictionElement.innerText = `Predicted Class: ${predictedClass} (Confidence: ${maxScore.toFixed(2)})`;
-        requestAnimationFrame(detectPose);
-    }
-    startButton.addEventListener('click', () => {
-        startCamera().catch(err => {
-            console.error("Error starting camera: ", err);
+        document.getElementById('start-button').addEventListener('click', async () => {
+            await init();
+            document.getElementById('start-button').style.display = 'none';
+            document.getElementById('close-button').style.display = 'block';
         });
-    });
 
-    closeButton.addEventListener('click', closeCamera);
-</script>
+        document.getElementById('close-button').addEventListener('click', () => {
+            webcam.stop(); // Stop the webcam
+            const videoElement = document.getElementById('video');
+            videoElement.srcObject = null; // Clear the video source
+            videoElement.style.display = 'none'; // Hide video
+            document.getElementById('canvas').style.display = 'none'; // Hide canvas
+            document.getElementById('close-button').style.display = 'none'; // Hide close button
+            document.getElementById('start-button').style.display = 'block'; // Show start button
+        });
+    </script>
+</body>
 </html>
