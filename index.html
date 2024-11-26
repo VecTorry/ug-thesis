@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"></html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,17 +10,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f4f4f4;
-        }
-        video {
-            width: 200px; /* Set a fixed width */
-            height: 200px; /* Set a fixed height */
-            border: 1px solid black;
+            background-color: #b5b5b5;
         }
         canvas {
-            position: absolute; /* Position the canvas on top of the video */
-            width: 200px; /* Match the video width */
-            height: 200px; /* Match the video height */
+            width: 800px; /* Match the video width */
+            height: 600px; /* Match the video height */
         }
         button {
             margin: 10px;
@@ -37,12 +31,14 @@
         }
         #label-container {
             margin-top: 20px;
-            font-size: 18px;
+            font-size: 32px;
+            background-color: white;
+            border: black;
         }
     </style>
 </head>
 <body>
-    <h1>Webcam Feed</h1>
+    <!--<h2>Webcam Feed</h2>-->
     <video id="video" autoplay></video>
     <canvas id="canvas"></canvas>
     <button id="start-button">Open Camera</button>
@@ -126,7 +122,7 @@
 
         document.getElementById('close-button').addEventListener('click', () => {
             webcam.stop(); // Stop the webcam
-            const videoElement = document.getElementById('video');
+            const videoElement = document.getElementById('canvas');
             videoElement.srcObject = null; // Clear the video source
             videoElement.style.display = 'none'; // Hide video
             document.getElementById('canvas').style.display = 'none'; // Hide canvas
