@@ -1,134 +1,24 @@
 <!DOCTYPE html>
-<html lang="en"></html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Posture Analysis</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #b5b5b5;
-        }
-        canvas {
-            width: 800px; /* Match the video width */
-            height: 600px; /* Match the video height */
-        }
-        button {
-            margin: 10px;
-            padding: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #label-container {
-            margin-top: 20px;
-            font-size: 32px;
-            background-color: white;
-            border: black;
-        }
-    </style>
-</head>
-<body>
-    <!--<h2>Webcam Feed</h2>-->
-    <video id="video" autoplay></video>
-    <canvas id="canvas"></canvas>
-    <button id="start-button">Open Camera</button>
-    <button id="close-button" style="display: none;">Close Camera</button>
-    <div id="label-container"></div>
-
-    <!-- Include TensorFlow.js -->
+    <title>Posture Detection System</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
-    <script type="text/javascript">
-        const URL = "./my_model/"; // Update with your model path
-        let model, webcam, ctx, labelContainer, maxPredictions;
-
-        async function init() {
-            const modelURL = "model.json";
-            const metadataURL = "metadata.json";
-
-            // Load the model and metadata
-            model = await tmPose.load(modelURL, metadataURL);
-            maxPredictions = model.getTotalClasses();
-
-            console.log("Model loaded successfully");
-
-            // Setup webcam
-            const size = 200;
-            const flip = true; // whether to flip the webcam
-            webcam = new tmPose.Webcam(size, size, flip); // width, height, flip
-            await webcam.setup(); // request access to the webcam
-            await webcam.play(); // Start playing the webcam
-            window.requestAnimationFrame(loop);
-
-            // Set up the canvas
-            const canvas = document.getElementById("canvas");
-            canvas.width = size; 
-            canvas.height = size;
-            ctx = canvas.getContext("2d");
-            labelContainer = document.getElementById("label-container");
-            for (let i = 0; i < maxPredictions; i++) { // and class labels
-                labelContainer.appendChild(document.createElement("div"));
-            }
-
-            console.log("Webcam setup completed");
-        }
-
-        async function loop() {
-            webcam.update(); // update the webcam frame
-            await predict();
-            window.requestAnimationFrame(loop);
-        }
-
-        async function predict() {
-            const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-            const prediction = await model.predict(posenetOutput);
-
-            for (let i = 0; i < maxPredictions; i++) {
-                const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-                labelContainer.childNodes[i].innerHTML = classPrediction;
-            }
-
-            // Draw the poses
-            drawPose(pose);
-        }
-
-        function drawPose(pose) {
-            if (webcam.canvas) {
-                ctx.drawImage(webcam.canvas, 0, 0);
-                // Draw the keypoints and skeleton
-                if (pose) {
-                    const minPartConfidence = 0.5;
-                    tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx);
-                    tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx);
-                }
-            }
-        }
-
-        document.getElementById('start-button').addEventListener('click', async () => {
-            await init();
-            document.getElementById('start-button').style.display = 'none';
-            document.getElementById('close-button').style.display = 'block';
-        });
-
-        document.getElementById('close-button').addEventListener('click', () => {
-            webcam.stop(); // Stop the webcam
-            const videoElement = document.getElementById('canvas');
-            videoElement.srcObject = null; // Clear the video source
-            videoElement.style.display = 'none'; // Hide video
-            document.getElementById('canvas').style.display = 'none'; // Hide canvas
-            document.getElementById('close-button').style.display = 'none'; // Hide close button
-            document.getElementById('start-button').style.display = 'block'; // Show start button
-        });
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div id="webcam-container">
+            <canvas id="canvas"></canvas>
+        </div>
+        <button onclick="init()">Open Camera</button>
+        <button onclick="stopWebcam()">Close Camera</button>
+        <div id="label-container"></div>
+        <button onclick="generateReport()" id="report-btn" style="display:none">Generate Report</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

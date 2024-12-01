@@ -1,0 +1,4 @@
+.container { max-width: 800px; margin: 0 auto; padding: 20px; }
+#webcam-container { margin: 20px 0; }
+button { margin: 5px; padding: 10px; }
+#label-container { margin-top: 20px; }
