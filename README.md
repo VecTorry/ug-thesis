@@ -12,6 +12,12 @@ LATEST CHANGES:
 - Fixed "Close Camera" button and function to properly stop camera feedback and logging in Firebase.
 - Added "Generate Report" button and function to print out logged poses in PDF form from Firebase database.
 - Added "Clear Logs" button and function to clear logged postures on Firebase database.
+- NEW pose labels: Neutral, Cross Legged, Slouched Forward, Side Slouch, Slouched Backward, Head Dropping (changed files:metadata.json, model.json, & weights.bin)
+    - Flexible software: Able to feed on imported TensorFlow.js without software changes (Potential feature where user can import their own models).
+- Removed requirements.txt file.
+- Added preview of generated report before downloading as pdf file.
+- Added error handling and web browser logging for easier debugging.
+- Slightly improved report UI for readability
 
 
 KNOWN ISSUES:
@@ -36,7 +42,7 @@ ROAD MAP:
 
 3) [DONE] System will log individual detected poses for 1 frame every second, then output the full list of all the poses into what ever is compatible for analyzation.
 
-4) [IN PROGRESS] The log will be analyzed by another AI or a simple function, which would be included in the report if a user has had a bad or good posture, and will provide recommendations for improvement.
+4) [IN PROGRESS] The log will be analyzed by another AI or a simple if-else function, which would be included in the report if a user has had a bad or good posture, and will provide recommendations for improvement.
 
 5) [IN PROGRESS] Deploy the system to be accessible through the use of internet instead of a local host with a local port.
 

@@ -1,4 +1,240 @@
-.container { max-width: 800px; margin: 0 auto; padding: 20px; }
-#webcam-container { margin: 20px 0; }
-button { margin: 5px; padding: 10px; }
-#label-container { margin-top: 20px; }
+.container { 
+    max-width: 800px; 
+    margin: 0 auto; 
+    padding: 20px; 
+}
+
+#webcam-container { 
+    margin: 20px 0;
+    text-align: center;
+}
+
+#canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.control-buttons,
+.report-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+    justify-content: center;
+}
+
+button { 
+    margin: 5px; 
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#label-container { 
+    margin: 20px 0;
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+}
+
+#label-container div {
+    margin: 5px 0;
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Changed from auto to hidden to prevent double scrollbars */
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal[style*="display: block"] {
+    display: flex !important;
+    align-items: flex-start; /* Changed from center to allow scrolling from top */
+    justify-content: center;
+    padding: 20px; /* Add padding to prevent content touching screen edges */
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: 20px auto; /* Reduced top margin */
+    padding: 50px 30px 30px 30px; /* Increased top padding to accommodate close button */
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh; /* Limit height to 90% of viewport height */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    overflow-y: auto; /* Add scroll to modal content */
+}
+
+.modal .close {
+    position: fixed; /* Changed from absolute to fixed */
+    right: calc(5% + 20px); /* Align with modal edge */
+    top: 40px; /* Adjusted to be visible */
+    font-size: 28px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    background: white; /* Added background */
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 2; /* Ensure it's above other content */
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: black;
+}
+
+.modal .close:hover {
+    color: #000;
+}
+
+/* Report content styles */
+#report-content {
+    padding: 20px;
+    margin-top: 20px; /* Add space at top for close button */
+}
+
+.report-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.report-header h1 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.posture-legends {
+    margin: 20px 0;
+}
+
+.color-legend {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.color-box {
+    width: 16px;
+    height: 16px;
+    margin-right: 12px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.chart-container {
+    margin: 25px 0;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    max-width: 100%; /* Ensure charts don't overflow */
+}
+
+.chart-container h2 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.download-btn {
+    display: block;
+    margin: 20px auto 0;
+    padding: 12px 25px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .modal-content {
+        width: 95%;
+        padding: 45px 15px 15px 15px;
+        margin: 10px;
+    }
+
+    .modal .close {
+        right: 25px;
+        top: 25px;
+    }
+
+    .chart-container {
+        padding: 10px;
+    }
+}
+
+#session-status {
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+#session-status span {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 12px;
+}
+
+.loading {
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
