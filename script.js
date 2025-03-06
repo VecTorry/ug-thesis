@@ -115,25 +115,27 @@ window.initializeApp = async function() {
 // InitializeApp app function | Camera and model initialization (runs when "Open Camera" is clicked)
 window.init = async function() {
     try {
-        showLoading('webcam-container');
-        
+        // Show loading spinner
+        const webcamContainer = document.getElementById('webcam-container');
+        webcamContainer.classList.add('loading');
+
         // Add a small delay to ensure ports are ready
         await new Promise(resolve => setTimeout(resolve, 100));
-        
+
         // Ensure database is initialized
         database = database || await initializeFirebase();
-        
+
         const modelURL = URL + "model.json";
         const metadataURL = URL + "metadata.json";
-        
+
         // Add timeout and error handling for model loading
         const modelLoadPromise = Promise.race([
             tmPose.load(modelURL, metadataURL),
-            new Promise((_, reject) => 
+            new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Model load timeout')), 10000)
             )
         ]);
-        
+
         model = await modelLoadPromise;
         maxPredictions = model.getTotalClasses();
 
@@ -141,29 +143,29 @@ window.init = async function() {
         const size = 400;
         const flip = true;
         webcam = new tmPose.Webcam(size, size, flip);
-        
+
         try {
             await webcam.setup();
             await webcam.play();
-            
+
             // Clear any existing logging interval
             if (loggingInterval) {
                 clearInterval(loggingInterval);
             }
-            
+
             // Start new logging interval
             loggingInterval = setInterval(logPosture, 1000);
             console.log("Started posture logging interval");
-            
+
             // Start animation loop
             window.requestAnimationFrame(loop);
-            
+
             // Set session start time if not already set
             if (!sessionStartTime) {
                 sessionStartTime = new Date().toISOString();
                 localStorage.setItem('sessionStartTime', sessionStartTime);
             }
-            
+
             updateSessionStatus();
         } catch (webcamError) {
             console.error("Webcam setup error:", webcamError);
@@ -190,12 +192,14 @@ window.init = async function() {
         } else {
             console.error("Label container not found");
             throw new Error("Required elements not found");
-        }   
+        }
     } catch (error) {
         console.error("Initialization error:", error);
         alert("Error initializing the application. Please check console for details.");
     } finally {
-        hideLoading('webcam-container');
+        // Hide loading spinner
+        const webcamContainer = document.getElementById('webcam-container');
+        webcamContainer.classList.remove('loading');
     }
 };
 
