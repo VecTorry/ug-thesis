@@ -3,11 +3,15 @@
 
 Firebase link: https://console.firebase.google.com/project/ug-thesis-fb/overview
 
-(New) LATEST CHANGES:
-- Added error handling for server.js.
-- Added dark mode option on UI
 
-(Old) LATEST CHANGES:
+LATEST CHANGES:
+- Added error handling for server.js.
+- Added dark mode option on UI.
+- Added loading spinner UI on camera initialization.
+- Added confidence level bar style.
+
+
+PREVIOUS CHANGES:
 - Added Google's Firebase for data management. May have much more potentials for the future.
 - Detached JavaScript and CSS on different files: scripts.js and styles.css.
 - Initialized "npm init -y" on bash for local host then "npm install firebase"
@@ -23,19 +27,16 @@ Firebase link: https://console.firebase.google.com/project/ug-thesis-fb/overview
 - Slightly improved report UI for readability
 
 
-KNOWN ISSUES:
-1) None, will make issues soon.
+KNOWN ISSUE(S):
+1) Pie chart of generated report not coloured right and automatically.
 
 
-NOTES:
-- Three possible ways to make a recommendation report for post-session reports instead of just statistics of logged postures (Hardest to Easiest):
-1: Make ourselves an AI model and train on huge amounts of data gathered either by us, online, or both.
-2: Integrate ChatGPT into the system and let ChatGPT generate recommendation based on the logged postures.
-3: [APPROVED] A very simple if/else function like: "if good_posture (>50): live; elif bad_posture (>50): die;".
+NOTE(S):
+- None
 
 
-NEXT TASK:
-- The log & records will be summarized into a pop-up tab which could also be automatically or manually downloaded after user prompt.
+NEXT TASK(S):
+- While on active session: A simple function of "if good_posture (>50): live; elif bad_posture (>50): die;" instead of a critical system. Eliminating professional or export advises. Employing common sense.
 
 
 ROAD MAP:
@@ -47,7 +48,7 @@ ROAD MAP:
 
 4) [IN PROGRESS] The log & records will be summarized into a pop-up tab which could also be automatically or manually downloaded after user prompt.
 
-5) [IN PROGRESS] Deploy the system to be accessible through the use of internet instead of a local host with a local port.
+5) Deploy the system to be accessible through the use of internet instead of a local host with a local port.
 
 6) [IN PROGRESS] Add in extra CSS designs to make the system more visually appealing and user-friendly.
 

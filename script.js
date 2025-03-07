@@ -436,9 +436,20 @@ async function predict() {
     const prediction = await model.predict(posenetOutput);
 
     for (let i = 0; i < maxPredictions; i++) {
-        const classPrediction =
-            prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-        labelContainer.childNodes[i].innerHTML = classPrediction;
+        const classPrediction = prediction[i];
+        const confidence = classPrediction.probability.toFixed(2);
+        const labelElement = labelContainer.childNodes[i];
+
+        // Update text and confidence bar
+        labelElement.innerHTML = `
+            <div class="posture-label">
+                ${classPrediction.className}: 
+                <span class="confidence-value">${(confidence * 100).toFixed(1)}%</span>
+            </div>
+            <div class="confidence-bar">
+                <div class="confidence-fill" style="width: ${confidence * 100}%"></div>
+            </div>
+        `;
     }
 
     drawPose(pose);
@@ -796,6 +807,7 @@ function formatTimeLabel(date, interval) {
     }
 }
 
+// Clear Logs
 window.clearLogs = async function() {
     try {
         // Clear Firebase database
