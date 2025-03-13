@@ -16,6 +16,10 @@
   "description": "\"# ug-thesis\"",
   "dependencies": {
     "express": "^4.21.1",
-    "firebase": "^11.0.2"
-  }
+    "firebase": "^11.0.2",
+    "next": "^14.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+}
+  
 }
