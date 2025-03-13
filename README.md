@@ -9,6 +9,8 @@ LATEST CHANGES:
 - Added dark mode option on UI.
 - Added loading spinner UI on camera initialization.
 - Added confidence level bar style.
+- Added New Datasets on repository for experiments.
+- Fully deployed webapp. Accessible through internet instead of local host.
 
 
 PREVIOUS CHANGES:

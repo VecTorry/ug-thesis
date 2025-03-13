@@ -1,6 +1,12 @@
 // import { initializeApp, getApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
 // import { getDatabase, ref, push, set, get } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js';
 
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
 // Global Variables
 let initializationInProgress = false;
 let firebaseInitialized = false;
@@ -20,6 +26,7 @@ const POSTURE_COLORS = {
     'Side Slouch': 'orange'
 };
 
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
     apiKey: "AIzaSyBJ2JvbGg2m2E4Lqn3Ndu9lxZSoXfRvT3E",
     authDomain: "ug-thesis-fb.firebaseapp.com",
@@ -29,7 +36,11 @@ const firebaseConfig = {
     messagingSenderId: "540958723213",
     appId: "1:540958723213:web:4176826738ef9aa59da6c4",
     measurementId: "G-E9T15CH7FT"
-};
+  };
+
+// Initialize Firebase
+// const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 // Firebase initialization
 async function initializeFirebase() {
@@ -49,7 +60,7 @@ async function initializeFirebase() {
 
     try {
         if (!app) {
-            app = firebase.initializeApp(firebaseConfig);
+            const app = firebase.initializeApp(firebaseConfig);
             console.log("Created new Firebase app");
         }
         
@@ -380,7 +391,7 @@ function createPreviewCharts(analysis) {
             const datasets = Object.keys(analysis.postureCounts).map(posture => ({
                 label: posture,
                 data: timeData.labels.map(label => timeData.data[label][posture] || 0),
-                borderColor: POSTURE_COLORS[posture],
+                borderColor: POSTURE_COLORS[posture], 
                 fill: false,
                 tension: 0.4,
                 borderWidth: 2
