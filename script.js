@@ -31,6 +31,41 @@ const firebaseConfig = {
     measurementId: "G-E9T15CH7FT"
 };
 
+// Function to toggle dark mode
+window.toggleDarkMode = function () {
+    const body = document.body;
+    body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
+};
+
+// Check for saved dark mode preference on page load
+function checkDarkModePreference() {
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+    }
+}
+
+// Function to show loading state
+function showLoading(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.classList.add('loading'); // For spinner and text
+        element.style.opacity = '0.5';    // Dim the container
+        element.style.pointerEvents = 'none'; // Disable interaction
+    }
+}
+
+// Function to hide loading state
+function hideLoading(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.classList.remove('loading');
+        element.style.opacity = '1';
+        element.style.pointerEvents = 'auto';
+    }
+}
+
 // Firebase initialization
 async function initializeFirebase() {
     if (firebaseInitialized) {
@@ -52,7 +87,6 @@ async function initializeFirebase() {
             app = firebase.initializeApp(firebaseConfig);
             console.log("Created new Firebase app");
         }
-        
         console.log("Getting database reference");
         database = firebase.database();
         firebaseInitialized = true;
@@ -95,7 +129,6 @@ window.initializeApp = async function() {
             await testDatabaseConnection();
         }
         
-        // Check for existing session
         const storedSessionTime = localStorage.getItem('sessionStartTime');
         if (!sessionStartTime && !storedSessionTime) {
             sessionStartTime = new Date().toISOString();
@@ -117,27 +150,21 @@ window.init = async function() {
     try {
         showLoading('webcam-container');
         
-        // Add a small delay to ensure ports are ready
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Ensure database is initialized
         database = database || await initializeFirebase();
         
         const modelURL = URL + "model.json";
         const metadataURL = URL + "metadata.json";
         
-        // Add timeout and error handling for model loading
         const modelLoadPromise = Promise.race([
             tmPose.load(modelURL, metadataURL),
-            new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Model load timeout')), 10000)
-            )
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Model load timeout')), 10000))
         ]);
         
         model = await modelLoadPromise;
         maxPredictions = model.getTotalClasses();
 
-        // Initialize webcam with error handling
         const size = 400;
         const flip = true;
         webcam = new tmPose.Webcam(size, size, flip);
@@ -146,19 +173,15 @@ window.init = async function() {
             await webcam.setup();
             await webcam.play();
             
-            // Clear any existing logging interval
             if (loggingInterval) {
                 clearInterval(loggingInterval);
             }
             
-            // Start new logging interval
             loggingInterval = setInterval(logPosture, 1000);
             console.log("Started posture logging interval");
             
-            // Start animation loop
             window.requestAnimationFrame(loop);
             
-            // Set session start time if not already set
             if (!sessionStartTime) {
                 sessionStartTime = new Date().toISOString();
                 localStorage.setItem('sessionStartTime', sessionStartTime);
@@ -185,7 +208,15 @@ window.init = async function() {
         if (labelContainer) {
             labelContainer.innerHTML = ''; // Clear existing content
             for (let i = 0; i < maxPredictions; i++) {
-                labelContainer.appendChild(document.createElement("div"));
+                const labelDiv = document.createElement("div");
+                labelDiv.className = "label-item"; // Add a class for styling
+                labelDiv.innerHTML = `
+                    <span class="label-text"></span>
+                    <div class="confidence-bar-container">
+                        <div class="confidence-bar"></div>
+                    </div>
+                `;
+                labelContainer.appendChild(labelDiv);
             }
         } else {
             console.error("Label container not found");
@@ -201,7 +232,6 @@ window.init = async function() {
 
 function drawPose(pose) {
     if (!webcam?.canvas || !ctx) return;
-    
     try {
         ctx.drawImage(webcam.canvas, 0, 0);
         if (pose) {
@@ -216,7 +246,8 @@ function drawPose(pose) {
 
 // Event listener
 window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(initializeApp, 100); // Add small delay
+    checkDarkModePreference();
+    setTimeout(initializeApp, 100);
 });
 
 // Modified loadHistoricalLogs function
@@ -432,9 +463,18 @@ async function predict() {
     const prediction = await model.predict(posenetOutput);
 
     for (let i = 0; i < maxPredictions; i++) {
-        const classPrediction =
-            prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-        labelContainer.childNodes[i].innerHTML = classPrediction;
+        const classPrediction = `${prediction[i].className}: ${prediction[i].probability.toFixed(2)}`;
+        const confidence = prediction[i].probability * 100; // Convert to percentage
+        
+        const labelDiv = labelContainer.childNodes[i];
+        if (labelDiv) {
+            const labelText = labelDiv.querySelector('.label-text');
+            const confidenceBar = labelDiv.querySelector('.confidence-bar');
+            if (labelText && confidenceBar) {
+                labelText.textContent = classPrediction;
+                confidenceBar.style.width = `${confidence}%`; // Set bar width based on confidence
+            }
+        }
     }
 
     drawPose(pose);
@@ -813,24 +853,6 @@ window.clearLogs = async function() {
         alert('Error clearing logs. Please try again.');
     }
 };
-
-// Function to show loading state
-function showLoading(elementId) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.style.opacity = '0.5';
-        element.style.pointerEvents = 'none';
-    }
-}
-
-// Function to hide loading state
-function hideLoading(elementId) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.style.opacity = '1';
-        element.style.pointerEvents = 'auto';
-    }
-}
 
 function updateSessionStatus() {
     const container = document.querySelector('.control-buttons');
