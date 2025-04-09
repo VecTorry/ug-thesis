@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- update the version number as needed -->
+    <script src="/__/firebase/11.4.0/firebase-app-compat.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script src="/__/firebase/11.4.0/firebase-auth-compat.js"></script>
+    <script src="/__/firebase/11.4.0/firebase-database-compat.js"></script>
+    <script src="/__/firebase/11.4.0/firebase-firestore-compat.js"></script>
+    <script src="/__/firebase/11.4.0/firebase-functions-compat.js"></script>
+    <script src="/__/firebase/11.4.0/firebase-messaging-compat.js"></script>
+    <script src="/__/firebase/11.4.0/firebase-storage-compat.js"></script>
+    <script src="/__/firebase/11.4.0/firebase-analytics-compat.js"></script>
+    <script src="/__/firebase/11.4.0/firebase-remote-config-compat.js"></script>
+    <!-- <script src="/__/firebase/11.4.0/firebase-performance-compat.js"></script> -->
+    <!-- 
+      initialize the SDK after all desired features are loaded, set useEmulator to false
+      to avoid connecting the SDK to running emulators.
+    -->
+    <script src="/__/firebase/init.js?useEmulator=true"></script>
+
+    <title>Posture Detection</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- TensorFlow.js and Teachable Machine -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@latest/dist/teachablemachine-pose.min.js"></script>
+
+    <!-- Chart.js for reports -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="dark-mode-toggle">
+            <button id="dark-mode-toggle-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+        </div>
+
+        <div id="webcam-container">
+            <div id="loading-spinner" class="loading-spinner"></div>
+            <div id="loading-text">Initializing Camera...</div>
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="control-buttons">
+            <button onclick="init()">Open Camera</button>
+            <button onclick="stopWebcam()">Close Camera</button>
+        </div>
+
+        <div id="label-container"></div>
+
+        <div class="report-buttons">
+            <button onclick="generateReport()">Generate Report</button>
+        </div>
+
+        <button onclick="clearLogs()">Clear Logs</button>
+
+        <div id="report-preview" class="modal">
+            <div class="modal-content">
+                <div id="report-content">
+                </div>
+                <button class="download-btn" onclick="downloadPDF()">Download PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Your custom script -->
+    <script src="script.js" type="module"></script>
+    <div id="webcam-status"></div>
+    <div id="log-status"></div>
+    <div id="report-status"></div>
+    <div id="pdf-status"></div>
+    <div id="app-status"></div>
+</body>
+</html>

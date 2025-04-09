@@ -11,6 +11,8 @@ LATEST CHANGES:
 - Added confidence level bar style.
 - Added New Datasets on repository for experiments.
 - Fully deployed webapp. Accessible through internet instead of local host.
+- Uncountable bug fixes after firebase deployment.
+- Added simple feedback directly to UI just below the "Clear Logs" and "Generate Report" button.
 
 
 PREVIOUS CHANGES:
@@ -31,6 +33,7 @@ PREVIOUS CHANGES:
 
 KNOWN ISSUE(S):
 1) Pie chart of generated report not coloured right and automatically.
+2) Webcam access always failing.
 
 
 NOTE(S):
@@ -50,8 +53,8 @@ ROAD MAP:
 
 4) [IN PROGRESS] The log & records will be summarized into a pop-up tab which could also be automatically or manually downloaded after user prompt.
 
-5) Deploy the system to be accessible through the use of internet instead of a local host with a local port.
+5) [DONE] Deploy the system to be accessible through the use of internet instead of a local host with a local port.
 
 6) [IN PROGRESS] Add in extra CSS designs to make the system more visually appealing and user-friendly.
 
-7) Maintain the deployed software and fix post-deployment bugs.
+7) [IN PROGRESS INDEFINITELY ]Maintain the deployed software and fix post-deployment bugs.

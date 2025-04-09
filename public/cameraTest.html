@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8.6/dist/teachablemachine-pose.min.js"></script>
+</head>
+<body>
+    <div id="webcam-container"></div>
+    <script>
+        async function init() {
+            const size = 200;
+            const flip = true;
+            const webcam = new tmPose.Webcam(size, size, flip);
+            await webcam.setup();
+            document.getElementById('webcam-container').appendChild(webcam.video);
+            await webcam.play();
+            console.log("Webcam initialized successfully");
+        }
+        init();
+    </script>
+</body>
+</html>

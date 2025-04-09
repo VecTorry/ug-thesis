@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "THESIS",
+    "public": "public",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -11,6 +11,23 @@
         "source": "**",
         "destination": "/index.html"
       }
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Permissions-Policy",
+            "value": "interest-cohort=()"
+          }
+        ]
+      }
     ]
+  },
+  "emulators": {
+    "hosting": {
+      "port": 5000,
+      "host": "0.0.0.0"
+    }
   }
 }

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Model Load Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
+</head>
+<body>
+    <h1>Model Load Test</h1>
+    <script>
+        const modelURL = 'model.json';
+        const metadataURL = 'metadata.json';
+
+        async function loadModel() {
+            try {
+                const model = await tmPose.load(modelURL, metadataURL);
+                console.log('Model loaded successfully:', model);
+                alert('Model loaded successfully!');
+            } catch (error) {
+                console.error('Error loading model:', error);
+                alert('Error loading model. Check console.');
+            }
+        }
+
+        loadModel();
+    </script>
+</body>
+</html>
