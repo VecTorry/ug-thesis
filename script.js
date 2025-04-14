@@ -268,95 +268,78 @@ async function loadHistoricalLogs() {
 
 // Function to show the report preview
 function showReportPreview(analysis, reportType) {
-    try {
-        showLoading('report-content');
-        const modal = document.getElementById('report-preview');
-        const content = document.getElementById('report-content');
-        if (!modal || !content) {
-            console.error('Required elements not found');
-            return;
-        }
-
-        const duration = calculateDuration(reportType === 'current' ? 
-            postureLogs.filter(log => log.timestamp > sessionStartTime) : 
-            postureLogs
-        );
-
-        // Create report content
-        let html = `
-            <div class="report-header">
-                <h1>Posture Analysis Report</h1>
-                <p>${formatDuration(duration)}</p>
-            </div>
-
-            <h2>Posture Distribution</h2>
-            <div class="posture-legends">
-        `;
-
-        // Add color-coded legends
-        Object.entries(analysis.posturePercentages).forEach(([posture, percentage]) => {
-            html += `
-                <div class="color-legend">
-                    <div class="color-box" style="background-color: ${POSTURE_COLORS[posture]}"></div>
-                    <span>${posture}: ${percentage}% (${analysis.postureCounts[posture]} times)</span>
-                </div>
-            `;
-        });
-
-        html += `
-            </div>
-            <div class="chart-container">
-                <canvas id="pieChart"></canvas>
-            </div>
-            <div class="chart-container">
-                <h2>Time Distribution</h2>
-                <canvas id="timeChart"></canvas>
-            </div>
-        `;
-
-        content.innerHTML = html;
-
-        // Create charts
-        createPreviewCharts(analysis);
-
-        // Store the report data for PDF generation
-        pdfDoc = {
-            analysis: analysis,
-            duration: duration,
-            reportType: reportType
-        };
-
-        // Show modal
-        modal.style.display = 'block';
-
-        // Add close button functionality
-        const closeButton = document.createElement('span');
-        closeButton.className = 'close';
-        closeButton.innerHTML = '×';
-        closeButton.onclick = function() {
-            modal.style.display = 'none';
-        };
-        modal.querySelector('.modal-content').insertBefore(closeButton, modal.querySelector('.modal-content').firstChild);
-
-        // Add click event to close modal when clicking outside
-        modal.onclick = function(event) {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        };
-
-        // Add keyboard event to close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && modal.style.display === 'block') {
-                modal.style.display = 'none';
-            }
-        });
-    } catch (error) {
-        console.error("Error showing report preview:", error);
-        alert("Error generating report preview. Please try again.");
-    } finally {
-        hideLoading('report-content');
+    showLoading('report-content');
+    const modal = document.getElementById('report-preview');
+    const content = document.getElementById('report-content');
+    if (!modal || !content) {
+        console.error('Required elements not found');
+        return;
     }
+
+    const duration = calculateDuration(reportType === 'current' ? 
+        postureLogs.filter(log => log.timestamp > sessionStartTime) : 
+        postureLogs
+    );
+
+    let html = `
+        <div class="report-header">
+            <h1>Posture Analysis Report</h1>
+            <p>${formatDuration(duration)}</p>
+        </div>
+        <h2>Posture Distribution</h2>
+        <div class="posture-legends">
+    `;
+
+    Object.entries(analysis.posturePercentages).forEach(([posture, percentage]) => {
+        html += `
+            <div class="color-legend">
+                <div class="color-box" style="background-color: ${POSTURE_COLORS[posture] || 'gray'}"></div>
+                <span>${posture}: ${percentage}% (${analysis.postureCounts[posture]} times)</span>
+            </div>
+        `;
+    });
+
+    html += `
+        </div>
+        <div class="chart-container">
+            <canvas id="pieChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h2>Time Distribution</h2>
+            <canvas id="timeChart"></canvas>
+        </div>
+        <h2>Recommendations</h2>
+        <ul>
+            ${generateRecommendations(analysis).map(rec => `<li>${rec}</li>`).join('')}
+        </ul>
+    `;
+
+    content.innerHTML = html;
+    createPreviewCharts(analysis);
+    
+    // Updated line: Store recommendations in pdfDoc
+    pdfDoc = {
+        analysis: analysis,
+        duration: duration,
+        reportType: reportType,
+        recommendations: generateRecommendations(analysis)
+    };
+
+    modal.style.display = 'block';
+    const closeButton = document.createElement('span');
+    closeButton.className = 'close';
+    closeButton.innerHTML = '×';
+    closeButton.onclick = () => modal.style.display = 'none';
+    modal.querySelector('.modal-content').insertBefore(closeButton, modal.querySelector('.modal-content').firstChild);
+
+    modal.onclick = (event) => {
+        if (event.target === modal) modal.style.display = 'none';
+    };
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal.style.display === 'block') modal.style.display = 'none';
+    });
+
+    hideLoading('report-content');
 }
 
 function createPreviewCharts(analysis) {
@@ -517,13 +500,13 @@ async function logPosture() {
             postureLogs.push(logEntry);
             
             // Log to Firebase
-            /*try {
+            try {
                 const logsRef = database.ref('posture-logs');
                 await logsRef.push(logEntry);
                 console.log("Successfully logged to Firebase:", logEntry);
             } catch (dbError) {
                 console.error("Firebase logging error:", dbError);
-            }*/
+            }
             
             updateSessionStatus();
         }
@@ -619,7 +602,6 @@ window.downloadPDF = function() {
         doc.text("Posture Distribution:", 20, yOffset);
         yOffset += 10;
 
-        // Safely process posture data
         Object.entries(pdfDoc.analysis.posturePercentages).forEach(([posture, percentage]) => {
             try {
                 const color = POSTURE_COLORS[posture];
@@ -656,7 +638,7 @@ window.downloadPDF = function() {
             console.error('Error adding pie chart:', error);
         }
 
-        // Check if we need a new page
+        // Check if we need a new page for the time chart
         if (yOffset + 100 > doc.internal.pageSize.height) {
             doc.addPage();
             yOffset = 20;
@@ -667,8 +649,39 @@ window.downloadPDF = function() {
         yOffset += 10;
         try {
             doc.addImage(timeChart.toDataURL(), 'PNG', 20, yOffset, 170, 85);
+            yOffset += 95; // Leave space after the chart
         } catch (error) {
             console.error('Error adding time chart:', error);
+        }
+
+        // Add recommendations section
+        if (pdfDoc.recommendations && pdfDoc.recommendations.length > 0) {
+            // Check if there's enough space; if not, add a new page
+            if (yOffset + 50 > doc.internal.pageSize.height) {
+                doc.addPage();
+                yOffset = 20;
+            }
+
+            // Section header
+            doc.setFontSize(16);
+            doc.setTextColor(44, 62, 80);
+            doc.text("Recommendations:", 20, yOffset);
+            yOffset += 10;
+
+            // List recommendations
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            pdfDoc.recommendations.forEach((rec, index) => {
+                const lines = doc.splitTextToSize(rec, 170); // Wrap text to fit within 170 units width
+                doc.text(lines, 20, yOffset);
+                yOffset += lines.length * 10; // Adjust yOffset based on number of lines
+
+                // Add a new page if the content exceeds the page height
+                if (yOffset > doc.internal.pageSize.height - 20) {
+                    doc.addPage();
+                    yOffset = 20;
+                }
+            });
         }
 
         // Save the PDF with a formatted filename
@@ -735,37 +748,31 @@ function formatDuration(duration) {
 }
 
 function analyzePostureLogs(logs) {
-    // Time calculations
     const totalLogs = logs.length;
     const totalTimeMinutes = Math.round(totalLogs / 60);
-    
-    // Count postures
     const postureCounts = {};
     const timeSeriesData = {};
-    
+
     logs.forEach(log => {
-        // Count total occurrences
         postureCounts[log.posture] = (postureCounts[log.posture] || 0) + 1;
-        
-        // Group by hour for time series
         const hour = new Date(log.timestamp).getHours();
-        if (!timeSeriesData[hour]) {
-            timeSeriesData[hour] = {};
-        }
+        if (!timeSeriesData[hour]) timeSeriesData[hour] = {};
         timeSeriesData[hour][log.posture] = (timeSeriesData[hour][log.posture] || 0) + 1;
     });
 
-    // Calculate percentages
     const posturePercentages = {};
     Object.keys(postureCounts).forEach(posture => {
         posturePercentages[posture] = ((postureCounts[posture] / totalLogs) * 100).toFixed(2);
     });
 
+    const sustainedPoorPostures = findSustainedPoorPostures(logs);
+
     return {
         totalTime: totalTimeMinutes,
         postureCounts,
         posturePercentages,
-        timeSeriesData
+        timeSeriesData,
+        sustainedPoorPostures
     };
 }
 
@@ -832,26 +839,62 @@ function formatTimeLabel(date, interval) {
     }
 }
 
-window.clearLogs = async function() {
-    try {
-        // Clear Firebase database
-        await database.ref('posture-logs').set(null);
-        
-        // Clear local data
-        postureLogs = [];
-        sessionStartTime = null;
-        localStorage.removeItem('sessionStartTime');
-        
-        // Clear UI elements
-        if (labelContainer) {
-            labelContainer.innerHTML = '';
-        }
-        
-        alert('All logs cleared successfully!');
-    } catch (error) {
-        console.error('Error clearing logs:', error);
-        alert('Error clearing logs. Please try again.');
+// Variable to store the action to perform when confirmed
+let confirmCallback = null;
+
+// Function to open the modal with a custom message
+function openConfirmModal(message, callback) {
+    const modal = document.getElementById('confirm-modal');
+    const messageElement = document.getElementById('confirm-message');
+    if (modal && messageElement) {
+        messageElement.textContent = message; // Set the custom message
+        confirmCallback = callback; // Store the action to perform
+        modal.style.display = 'flex'; // Show the modal
     }
+}
+
+// Function to close the modal
+window.closeConfirmModal = function() {
+    const modal = document.getElementById('confirm-modal');
+    if (modal) {
+        modal.style.display = 'none'; // Hide the modal
+        confirmCallback = null; // Clear the callback
+    }
+}
+
+// Function to execute the confirmed action
+window.confirmAction = function() {
+    if (confirmCallback) {
+        confirmCallback(); // Run the stored action
+    }
+    closeConfirmModal(); // Close the modal
+}
+
+// Updated clearLogs function using the custom modal
+window.clearLogs = function() {
+    openConfirmModal('Are you sure you want to clear logs? This action is irreversible.', async function() {
+        try {
+            // Clear Firebase database (assuming you’re using Firebase)
+            await database.ref('posture-logs').set(null);
+            
+            // Clear local data
+            postureLogs = [];
+            sessionStartTime = null;
+            localStorage.removeItem('sessionStartTime');
+            
+            // Clear UI elements
+            if (labelContainer) {
+                labelContainer.innerHTML = '';
+            }
+            
+            // Optional: Show a success message (could use another modal here)
+            console.log('All logs cleared successfully!');
+        } catch (error) {
+            console.error('Error clearing logs:', error);
+            // Optional: Show an error message
+            console.log('Error clearing logs. Please try again.');
+        }
+    });
 };
 
 function updateSessionStatus() {
@@ -890,4 +933,90 @@ async function retryOperation(operation, maxAttempts = 3) {
             await new Promise(resolve => setTimeout(resolve, attempt * 1000));
         }
     }
+}
+
+function findSustainedPoorPostures(logs, minDurationMs = 5 * 60 * 1000) {
+    const sustainedPeriods = [];
+    let currentPosture = null;
+    let startTime = null;
+
+    for (let i = 0; i < logs.length; i++) {
+        const log = logs[i];
+        const posture = log.posture;
+        const timestamp = new Date(log.timestamp).getTime();
+
+        if (posture !== 'Neutral') {
+            if (currentPosture === posture && i > 0) {
+                const prevTime = new Date(logs[i - 1].timestamp).getTime();
+                if (timestamp - prevTime < 2000) { // Consider logs <2s apart as consecutive
+                    if (timestamp - startTime >= minDurationMs) {
+                        sustainedPeriods.push(posture);
+                    }
+                } else {
+                    currentPosture = posture;
+                    startTime = timestamp;
+                }
+            } else {
+                currentPosture = posture;
+                startTime = timestamp;
+            }
+        } else {
+            currentPosture = null;
+            startTime = null;
+        }
+    }
+    return [...new Set(sustainedPeriods)]; // Unique sustained postures
+}
+
+function generateRecommendations(analysis) {
+    const { posturePercentages, sustainedPoorPostures } = analysis;
+    const recommendations = [];
+
+    // Neutral posture feedback
+    if (posturePercentages['Neutral'] > 70) {
+        recommendations.push("Great job maintaining a neutral posture most of the time!");
+    } else {
+        recommendations.push("Try to maintain a neutral posture more consistently.");
+    }
+
+    // Identify dominant poor postures (>20%)
+    const dominantPoorPostures = Object.keys(posturePercentages)
+        .filter(p => p !== 'Neutral' && posturePercentages[p] > 20);
+
+    // Specific advice for dominant postures
+    dominantPoorPostures.forEach(posture => {
+        recommendations.push(getPostureAdvice(posture));
+    });
+
+    // Combined advice for specific mixes
+    if (dominantPoorPostures.includes('Slouched Forward') && dominantPoorPostures.includes('Head Dropping')) {
+        recommendations.push("You often slouch forward and let your head drop, which can significantly strain your neck and back. Sit up straight, align your head with your spine, and consider a chair with better support or frequent stretch breaks.");
+    } else if (dominantPoorPostures.includes('Slouched Sidewards') && dominantPoorPostures.includes('Chair Lean')) {
+        recommendations.push("You tend to lean sideways and rely heavily on your chair. This can cause muscle imbalance. Sit evenly with proper back support and try core-strengthening exercises.");
+    } else if (dominantPoorPostures.includes('Cross Legged') && dominantPoorPostures.includes('Slouched Backwards')) {
+        recommendations.push("Crossing your legs while leaning back may lead to discomfort and poor circulation. Keep both feet flat on the floor and sit upright with lumbar support.");
+    }
+
+    // Sustained posture advice
+    if (sustainedPoorPostures.length > 0) {
+        recommendations.push("You maintained poor posture for extended periods. Set reminders every 20-30 minutes to check your posture or take short stretch breaks.");
+    }
+
+    // General tips
+    recommendations.push("Take regular breaks to stretch and move around every hour.");
+    recommendations.push("Ensure your chair and desk are ergonomically set up to support your back and neck.");
+
+    return recommendations;
+}
+
+function getPostureAdvice(posture) {
+    const advice = {
+        'Cross Legged': "Try to avoid sitting with your legs crossed for long periods. It can restrict circulation and cause discomfort. Keep both feet flat on the floor instead.",
+        'Slouched Forward': "You’re slouching forward often. Sit up straight with your back against the chair to reduce neck and back strain. Adjust your chair or screen height if needed.",
+        'Slouched Sidewards': "Leaning to one side can imbalance your muscles. Sit evenly with both hips aligned and use a supportive chair.",
+        'Slouched Backwards': "Leaning back too much may strain your back. Adjust your chair to support your lower back and sit upright.",
+        'Head Dropping': "Your head drops forward frequently, which can strain your neck. Keep your head aligned with your spine and consider raising your screen.",
+        'Chair Lean': "Improper chair leaning can misalign your posture. Ensure your chair supports your back fully and sit straight."
+    };
+    return advice[posture] || "";
 }

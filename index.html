@@ -40,6 +40,18 @@
             </div>
         </div>
     </div>
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeConfirmModal()">&times;</span>
+            <h2>Confirm Action</h2>
+            <p id="confirm-message">Are you sure you want to proceed?</p>
+            <div class="modal-buttons">
+                <button onclick="confirmAction()">Yes</button>
+                <button onclick="closeConfirmModal()">No</button>
+            </div>
+        </div>
+    </div>
     <!-- Your custom script -->
     <script src="script.js"></script>
 </body>

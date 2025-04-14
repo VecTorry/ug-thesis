@@ -57,22 +57,20 @@ button:hover {
 
 /* Modal styles */
 .modal {
-    display: none;
+    display: none; /* Hidden by default */
     position: fixed;
-    z-index: 1;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden; /* Changed from auto to hidden to prevent double scrollbars */
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
 }
 
 .modal[style*="display: block"] {
-    display: flex !important;
-    align-items: flex-start; /* Changed from center to allow scrolling from top */
-    justify-content: center;
-    padding: 20px; /* Add padding to prevent content touching screen edges */
+    display: flex !important; /* Override inline display: block */
 }
 
 .modal-content {
@@ -90,28 +88,16 @@ button:hover {
 }
 
 .modal .close {
-    position: fixed; /* Changed from absolute to fixed */
-    right: calc(5% + 20px); /* Align with modal edge */
-    top: 40px; /* Adjusted to be visible */
-    font-size: 28px;
-    font-weight: bold;
-    color: #666;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
     cursor: pointer;
-    background: white; /* Added background */
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    z-index: 2; /* Ensure it's above other content */
-}
-
-.close {
     color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.3s ease;
+    background: none; /* Remove background */
+    border: none;
+    padding: 0;
+    box-shadow: none; /* Remove shadow */
 }
 
 .close:hover {
@@ -362,4 +348,62 @@ button:hover {
 
 .dark-mode .confidence-bar {
     background-color: #66BB6A; /* Lighter green for visibility in dark mode */
+}
+
+/* Confirmation Modal Specific Styles */
+.modal-content h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333; /* Dark text for light mode */
+}
+
+.modal-content p {
+    font-size: 14px;
+    margin-bottom: 20px;
+    color: #555; /* Slightly lighter text */
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-around;
+}
+
+.modal-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.modal-buttons button:first-child {
+    background-color: #2ecc71; /* Green for "Yes" */
+    color: white;
+}
+
+.modal-buttons button:last-child {
+    background-color: #e74c3c; /* Red for "No" */
+    color: white;
+}
+
+.modal-buttons button:hover {
+    opacity: 0.9; /* Slight hover effect */
+}
+
+/* Dark mode support for confirmation modal */
+.dark-mode .modal-content h2 {
+    color: #fff; /* White text for title */
+}
+
+.dark-mode .modal-content p {
+    color: #ccc; /* Light gray for message */
+}
+
+.dark-mode .modal-buttons button:first-child {
+    background-color: #27ae60; /* Darker green for "Yes" */
+}
+
+.dark-mode .modal-buttons button:last-child {
+    background-color: #c0392b; /* Darker red for "No" */
 }

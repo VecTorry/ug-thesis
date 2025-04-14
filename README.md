@@ -9,6 +9,9 @@ LATEST CHANGES:
 - Added dark mode option on UI.
 - Added loading spinner UI on camera initialization.
 - Added confidence level bar style.
+- Fixed metadata classes.
+- Added recommendations on report.
+- Slightly fixed posture class colouring in generated report.
 
 
 PREVIOUS CHANGES:
@@ -28,7 +31,7 @@ PREVIOUS CHANGES:
 
 
 KNOWN ISSUES:
-1) Pie chart of generated report not coloured right and automatically.
+1) Pie chart of generated report not being coloured right.
 
 
 NOTES:
