@@ -5,46 +5,23 @@ Firebase link: https://console.firebase.google.com/project/ug-thesis-fb/overview
 
 
 LATEST CHANGES:
-- Updated node_modules folder library.
-- Added dark mode option on UI.
-- Added loading spinner UI on camera initialization.
-- Added confidence level bar style.
-- Fixed metadata classes.
-- Added recommendations on report.
-- Slightly fixed posture class colouring in generated report.
-- Added option to either turn on or off database logging despite camera status.
-- Added Firebase database logged postures count displaying in real time.
+- Added changelog.txt.
 
 
 PREVIOUS CHANGES:
-- Added Google's Firebase for data management. May have much more potentials for the future.
-- Detached JavaScript and CSS on different files: scripts.js and styles.css.
-- Initialized "npm init -y" on bash for local host then "npm install firebase"
-- Several thousand changes in node_modules folder due to the previous action listed.
-- Fixed "Close Camera" button and function to properly stop camera feedback and logging in Firebase.
-- Added "Generate Report" button and function to print out logged poses in PDF form from Firebase database.
-- Added "Clear Logs" button and function to clear logged postures on Firebase database.
-- NEW pose labels: Neutral, Cross Legged, Slouched Forward, Side Slouch, Slouched Backward, Head Dropping (changed files:metadata.json, model.json, & weights.bin)
-- Flexible software: Able to feed on imported TensorFlow.js without software changes (Potential feature where user can import their own models).
-- Removed requirements.txt file.
-- Added preview of generated report before downloading as pdf file.
-- Added error handling and web browser logging for easier debugging.
-- Slightly improved report UI for readability
+- Read changelog.txt about previous versions.
 
 
 KNOWN ISSUES:
-1) Pie chart of generated report not being coloured right.
+1) Downloaded PDF report not including some logged postures on 'Posture Distribution'.
 
 
 NOTES:
-- Three possible ways to make a recommendation report for post-session reports instead of just statistics of logged postures (Hardest to Easiest):
-1: Make ourselves an AI model and train on huge amounts of data gathered either by us, online, or both.
-2: Integrate ChatGPT into the system and let ChatGPT generate recommendation based on the logged postures.
-3: A very simple if/else function like: "if good_posture (>50): live; elif bad_posture (>50): die;".
+- N/A
 
 
 NEXT TASK(S):
-- While on active session: A simple function of "if good_posture (>50): live; elif bad_posture (>50): die;" instead of a critical system. Eliminating professional or export advises. Employing common sense.
+- Deploy to online Firebase
 
 
 ROAD MAP:
@@ -54,10 +31,10 @@ ROAD MAP:
 
 3) [DONE] System will log individual detected poses for 1 frame every second, then output the full list of all the poses into what ever is compatible for analyzation.
 
-4) [IN PROGRESS] The log & records will be summarized into a pop-up tab which could also be automatically or manually downloaded after user prompt.
+4) [DONE] The log & records will be summarized into a pop-up tab which could also be automatically or manually downloaded after user prompt.
 
 5) [DONE] Deploy the system to be accessible through the use of internet instead of a local host with a local port.
 
-6) [IN PROGRESS] Add in extra CSS designs to make the system more visually appealing and user-friendly.
+6) [DONE] Add in extra CSS designs to make the system more visually appealing and user-friendly.
 
 7) [IN PROGRESS INDEFINITELY] Maintain the deployed software and fix post-deployment bugs.
