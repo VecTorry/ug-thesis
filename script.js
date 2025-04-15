@@ -10,6 +10,7 @@ let postureLogs = [];
 const URL = window.location.origin + "/";
 let sessionStartTime = null;
 let pdfDoc = null;
+let isLoggingEnabled = false; // Default to disabled
 
 const POSTURE_COLORS = {
     'Chair Lean': 'red',
@@ -138,6 +139,7 @@ window.initializeApp = async function() {
         }
         
         await loadHistoricalLogs();
+        updateLogCount(); // Add this line
         console.log("Application initialized successfully");
     } catch (error) {
         console.error("Application initialization error:", error);
@@ -264,6 +266,26 @@ async function loadHistoricalLogs() {
     } catch (error) {
         console.error("Error loading historical logs:", error);
     }
+}
+
+function updateLogCount() {
+    const logCountElement = document.getElementById('log-count');
+    if (!logCountElement || !database) return;
+
+    const logsRef = database.ref('posture-logs');
+    logsRef.on('value', (snapshot) => {
+        try {
+            const logs = snapshot.val();
+            const count = logs ? Object.keys(logs).length : 0;
+            logCountElement.textContent = `Database Logged Postures: ${count}`;
+        } catch (error) {
+            console.error('Error updating log count:', error);
+            logCountElement.textContent = `Database Logged Postures: Error`;
+        }
+    }, (error) => {
+        console.error('Firebase log count listener error:', error);
+        logCountElement.textContent = `Database Logged Postures: Error`;
+    });
 }
 
 // Function to show the report preview
@@ -500,12 +522,14 @@ async function logPosture() {
             postureLogs.push(logEntry);
             
             // Log to Firebase
-            try {
-                const logsRef = database.ref('posture-logs');
-                await logsRef.push(logEntry);
-                console.log("Successfully logged to Firebase:", logEntry);
-            } catch (dbError) {
-                console.error("Firebase logging error:", dbError);
+            if (isLoggingEnabled) {
+                try {
+                    const logsRef = database.ref('posture-logs');
+                    await logsRef.push(logEntry);
+                    console.log("Successfully logged to Firebase:", logEntry);
+                } catch (dbError) {
+                    console.error("Firebase logging error:", dbError);
+                }
             }
             
             updateSessionStatus();
@@ -912,9 +936,9 @@ function updateSessionStatus() {
     if (webcam && loggingInterval) {
         statusElement.innerHTML = `
             <span style="color: #4CAF50;">●</span> 
-            Recording Session (Started: ${new Date(sessionStartTime).toLocaleTimeString()})
+            Recording Session (Started: ${new Date(sessionStartTime).toLocaleTimeString()}) 
+            - Logging to Firebase: ${isLoggingEnabled ? "On" : "Off"}
         `;
-        console.log("Recording session active");
     } else {
         statusElement.innerHTML = `
             <span style="color: #666;">●</span> 
@@ -1020,3 +1044,13 @@ function getPostureAdvice(posture) {
     };
     return advice[posture] || "";
 }
+
+window.toggleLogging = function() {
+    isLoggingEnabled = !isLoggingEnabled;
+    const button = document.getElementById('toggle-logging-btn');
+    if (button) {
+        button.textContent = isLoggingEnabled ? "Disable Logging" : "Enable Logging";
+        button.classList.toggle('disabled', !isLoggingEnabled);
+        console.log("Logging " + (isLoggingEnabled ? "enabled" : "disabled"));
+    }
+};

@@ -27,7 +27,9 @@
         <div class="control-buttons">
             <button onclick="init()">Open Camera</button>
             <button onclick="stopWebcam()">Close Camera</button>
+            <button id="toggle-logging-btn" class="disabled" onclick="toggleLogging()">Enable Logging</button>
         </div>
+        <div id="log-count" class="log-count">Database Logged Postures: 0</div>
         <div id="label-container"></div>
         <div class="report-buttons">
             <button onclick="generateReport()">Generate Report</button>

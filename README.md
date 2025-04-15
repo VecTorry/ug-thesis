@@ -12,6 +12,8 @@ LATEST CHANGES:
 - Fixed metadata classes.
 - Added recommendations on report.
 - Slightly fixed posture class colouring in generated report.
+- Added option to either turn on or off database logging despite camera status.
+- Added Firebase database logged postures count displaying in real time.
 
 
 PREVIOUS CHANGES:
