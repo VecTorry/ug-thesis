@@ -1,11 +1,13 @@
 "# ug-thesis"
 
 
-Firebase link: https://console.firebase.google.com/project/ug-thesis-fb/overview
+Webpage link:   https://ug-thesis-fb.web.app/
+Firebase link:  https://console.firebase.google.com/project/ug-thesis-fb/overview
 
 
 LATEST CHANGES:
 - Added changelog.txt.
+- Read changelog.txt about latest changes.
 
 
 PREVIOUS CHANGES:
@@ -17,11 +19,17 @@ KNOWN ISSUES:
 
 
 NOTES:
-- N/A
+- Write permissions on Database rules are denied for now—Change if necessary.
+- Temporary changes to script.js:
+    - script.js changes:
+        - Added line 118. Commented out line 117.
+        - Added line 916. Commented out line 915.
+- Temporary changes to index.html:
+    - Added temporary parenthesis on line 52.
 
 
 NEXT TASK(S):
-- Deploy to online Firebase
+- Maintain & Upkeep webpage
 
 
 ROAD MAP:

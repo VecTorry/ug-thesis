@@ -1,0 +1,434 @@
+.container { 
+    max-width: 800px; 
+    margin: 0 auto; 
+    padding: 20px; 
+}
+
+#webcam-container { 
+    margin: 20px 0;
+    text-align: center;
+}
+
+#canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.control-buttons,
+.report-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+    justify-content: center;
+}
+
+button { 
+    margin: 5px; 
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#label-container { 
+    margin: 20px 0;
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+}
+
+#label-container div {
+    margin: 5px 0;
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Modal styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+.modal[style*="display: block"] {
+    display: flex !important; /* Override inline display: block */
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: 20px auto; /* Reduced top margin */
+    padding: 50px 30px 30px 30px; /* Increased top padding to accommodate close button */
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh; /* Limit height to 90% of viewport height */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    overflow-y: auto; /* Add scroll to modal content */
+}
+
+.modal .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #aaa;
+    background: none; /* Remove background */
+    border: none;
+    padding: 0;
+    box-shadow: none; /* Remove shadow */
+}
+
+.close:hover {
+    color: black;
+}
+
+.modal .close:hover {
+    color: #000;
+}
+
+/* Report content styles */
+#report-content {
+    padding: 20px;
+    margin-top: 20px; /* Add space at top for close button */
+}
+
+.report-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.report-header h1 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.posture-legends {
+    margin: 20px 0;
+}
+
+.color-legend {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.color-box {
+    width: 16px;
+    height: 16px;
+    margin-right: 12px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.chart-container {
+    margin: 25px 0;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    max-width: 100%; /* Ensure charts don't overflow */
+}
+
+.chart-container h2 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.download-btn {
+    display: block;
+    margin: 20px auto 0;
+    padding: 12px 25px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .modal-content {
+        width: 95%;
+        padding: 45px 15px 15px 15px;
+        margin: 10px;
+    }
+
+    .modal .close {
+        right: 25px;
+        top: 25px;
+    }
+
+    .chart-container {
+        padding: 10px;
+    }
+}
+
+#session-status {
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+#session-status span {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 12px;
+}
+
+.loading {
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Dark mode styles */
+.dark-mode {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.dark-mode .container {
+    background-color: #2d2d2d;
+}
+
+.dark-mode button {
+    background-color: #555555;
+    color: #ffffff;
+}
+
+.dark-mode button:hover {
+    background-color: #666666;
+}
+
+.dark-mode #label-container {
+    background-color: #3a3a3a;
+    color: #ffffff;
+}
+
+.dark-mode .modal-content {
+    background-color: #2d2d2d;
+    color: #ffffff;
+}
+
+.dark-mode .download-btn {
+    background-color: #555555;
+}
+
+.dark-mode .download-btn:hover {
+    background-color: #666666;
+}
+
+.dark-mode #session-status {
+    background-color: #3a3a3a;
+}
+
+/* Loading spinner styles */
+.loading-spinner {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid #4CAF50;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    z-index: 10;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+#webcam-container.loading .loading-spinner {
+    display: block;
+}
+
+#loading-text {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #4CAF50;
+    font-size: 16px;
+    z-index: 10;
+}
+
+#webcam-container.loading #loading-text {
+    display: block;
+}
+
+/* Optional: Dim the container when loading */
+#webcam-container.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Confidence bar styles */
+.label-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 10px 0;
+}
+
+.label-text {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.confidence-bar-container {
+    width: 100%;
+    max-width: 300px; /* Adjust as needed */
+    height: 10px;
+    background-color: #e0e0e0; /* Light gray background */
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.confidence-bar {
+    height: 100%;
+    background-color: #4CAF50; /* Green fill */
+    width: 0; /* Default width, updated by JS */
+    transition: width 0.3s ease; /* Smooth transition */
+}
+
+/* Dark mode adjustments for confidence bars */
+.dark-mode .confidence-bar-container {
+    background-color: #555555; /* Darker gray for dark mode */
+}
+
+.dark-mode .confidence-bar {
+    background-color: #66BB6A; /* Lighter green for visibility in dark mode */
+}
+
+/* Confirmation Modal Specific Styles */
+.modal-content h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333; /* Dark text for light mode */
+}
+
+.modal-content p {
+    font-size: 14px;
+    margin-bottom: 20px;
+    color: #555; /* Slightly lighter text */
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-around;
+}
+
+.modal-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.modal-buttons button:first-child {
+    background-color: #2ecc71; /* Green for "Yes" */
+    color: white;
+}
+
+.modal-buttons button:last-child {
+    background-color: #e74c3c; /* Red for "No" */
+    color: white;
+}
+
+.modal-buttons button:hover {
+    opacity: 0.9; /* Slight hover effect */
+}
+
+/* Dark mode support for confirmation modal */
+.dark-mode .modal-content h2 {
+    color: #fff; /* White text for title */
+}
+
+.dark-mode .modal-content p {
+    color: #ccc; /* Light gray for message */
+}
+
+.dark-mode .modal-buttons button:first-child {
+    background-color: #27ae60; /* Darker green for "Yes" */
+}
+
+.dark-mode .modal-buttons button:last-child {
+    background-color: #c0392b; /* Darker red for "No" */
+}
+
+#toggle-logging-btn {
+    background-color: #4CAF50; /* Green when enabled */
+}
+
+#toggle-logging-btn.disabled {
+    background-color: #e74c3c; /* Red when disabled */
+}
+
+/* Log count styles */
+.log-count {
+    text-align: center;
+    font-size: 14px;
+    margin: 10px 0;
+    padding: 8px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    color: #333;
+}
+
+/* Dark mode support for log count */
+.dark-mode .log-count {
+    background-color: #3a3a3a;
+    color: #ccc;
+}
