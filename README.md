@@ -15,17 +15,12 @@ PREVIOUS CHANGES:
 
 
 KNOWN ISSUES:
-1) Downloaded PDF report not including some logged postures on 'Posture Distribution'.
+1) Report not being colored correctly, showing black on some or most labels.
+2) Insufficient data for accurate and precise processing.
 
 
 NOTES:
-- Write permissions on Database rules are denied for now—Change if necessary.
-- Temporary changes to script.js:
-    - script.js changes:
-        - Added line 118. Commented out line 117.
-        - Added line 916. Commented out line 915.
-- Temporary changes to index.html:
-    - Added temporary parenthesis on line 52.
+- Read changelog.txt about NOTE(S).
 
 
 NEXT TASK(S):
