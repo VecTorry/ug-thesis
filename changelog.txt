@@ -1,11 +1,49 @@
-Version 1.1.0:
-
-
 Webpage link:   https://ug-thesis-fb.web.app/
 Firebase link:  https://console.firebase.google.com/project/ug-thesis-fb/overview
 
+
+================================================================================
+
+
+Version 1.1.2:
+
+
+NOTE:
+- N/A
+
+
 CHANGES:
-- Added camera selection option
+- Added notice to report tab about false data or ghost data with empty logs.
+
+
+
+================================================================================
+
+
+Version 1.1.1:
+
+
+NOTE:
+- Post defense update (Success with flying colors, by the way).
+
+
+CHANGES:
+- Restored write rules on Firebase:
+    - script.js changes:
+        - Restored 'window.updateSelectedCamera = function()' function.
+        - Restored line 916 (formerly line 915).
+- Temporary changes to index.html:
+    - Restored line 55 (formerly line 52).
+
+
+================================================================================
+
+
+Version 1.1.0:
+
+
+CHANGES:
+- Added camera selection option.
 
 
 NOTE:
@@ -16,10 +54,6 @@ NOTE:
 
 
 Version 1.0.1:
-
-
-Webpage link:   https://ug-thesis-fb.web.app/
-Firebase link:  https://console.firebase.google.com/project/ug-thesis-fb/overview
 
 
 CHANGES:
@@ -35,9 +69,6 @@ CHANGES:
 
 
 Version 0.9:
-
-
-Firebase link: https://console.firebase.google.com/project/ug-thesis-fb/overview
 
 
 LATEST CHANGES:

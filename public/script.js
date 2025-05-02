@@ -351,6 +351,7 @@ function showReportPreview(analysis, reportType) {
         <div class="report-header">
             <h1>Posture Analysis Report</h1>
             <p>${formatDuration(duration)}</p>
+            NOTICE: Report could show "Slouched Backwards" with empty logs on database
         </div>
         <h2>Posture Distribution</h2>
         <div class="posture-legends">
@@ -910,7 +911,7 @@ window.clearLogs = function() {
                 // labelContainer.innerHTML = '';
             }
             
-            console.log('All logs cleared successfully! (Denied Write permissions for now)');
+            console.log('All logs cleared successfully!');
         } catch (error) {
             console.error('Error clearing logs:', error);
             console.log('Error clearing logs. Please try again.');
