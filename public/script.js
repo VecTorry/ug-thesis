@@ -1,6 +1,3 @@
-// import { initializeApp, getApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
-// import { getDatabase, ref, push, set, get } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js';
-
 // Global Variables
 let initializationInProgress = false;
 let firebaseInitialized = false;
@@ -11,6 +8,7 @@ const URL = window.location.origin + "/";
 let sessionStartTime = null;
 let pdfDoc = null;
 let isLoggingEnabled = false; // Default to disabled
+let selectedCameraId = null; // Store selected camera device ID
 
 const POSTURE_COLORS = {
     'Chair Lean': 'red',
@@ -51,9 +49,9 @@ function checkDarkModePreference() {
 function showLoading(elementId) {
     const element = document.getElementById(elementId);
     if (element) {
-        element.classList.add('loading'); // For spinner and text
-        element.style.opacity = '0.5';    // Dim the container
-        element.style.pointerEvents = 'none'; // Disable interaction
+        element.classList.add('loading');
+        element.style.opacity = '0.5';
+        element.style.pointerEvents = 'none';
     }
 }
 
@@ -66,6 +64,48 @@ function hideLoading(elementId) {
         element.style.pointerEvents = 'auto';
     }
 }
+
+// Function to populate camera selection dropdown
+async function populateCameraSelect() {
+    const select = document.getElementById('camera-select');
+    if (!select) return;
+
+    try {
+        // Request permission to access cameras
+        await navigator.mediaDevices.getUserMedia({ video: true });
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+        // Clear existing options except the default
+        select.innerHTML = '<option value="">Select Camera</option>';
+
+        // Populate dropdown with camera options
+        videoDevices.forEach((device, index) => {
+            const option = document.createElement('option');
+            option.value = device.deviceId;
+            option.text = device.label || `Camera ${index + 1}`;
+            select.appendChild(option);
+        });
+
+        // Automatically select the first camera if available
+        if (videoDevices.length > 0) {
+            selectedCameraId = videoDevices[0].deviceId;
+            select.value = selectedCameraId;
+        }
+    } catch (error) {
+        console.error("Error enumerating cameras:", error);
+        alert("Unable to access cameras. Please ensure camera permissions are granted.");
+    }
+}
+
+// Function to update selected camera
+window.updateSelectedCamera = function() {
+    const select = document.getElementById('camera-select');
+    if (select) {
+        selectedCameraId = select.value;
+        console.log("Selected camera ID:", selectedCameraId);
+    }
+};
 
 // Firebase initialization
 async function initializeFirebase() {
@@ -111,10 +151,9 @@ async function testDatabaseConnection() {
             test: true
         });
         console.log("Database connection test successful");
-        await testRef.remove(); // Clean up test data
+        await testRef.remove();
     } catch (error) {
         console.error("Database connection test failed:", error);
-        // alert("Unable to connect to database. Please check your internet connection and try again.");
         alert("Database read rules is on but write is off for now.");
     }
 }
@@ -140,7 +179,8 @@ window.initializeApp = async function() {
         }
         
         await loadHistoricalLogs();
-        updateLogCount(); // Add this line
+        updateLogCount();
+        await populateCameraSelect(); // Populate camera dropdown
         console.log("Application initialized successfully");
     } catch (error) {
         console.error("Application initialization error:", error);
@@ -170,10 +210,13 @@ window.init = async function() {
 
         const size = 400;
         const flip = true;
+        
+        // Configure webcam with selected camera
+        const videoConstraints = selectedCameraId ? { deviceId: { exact: selectedCameraId } } : true;
         webcam = new tmPose.Webcam(size, size, flip);
         
         try {
-            await webcam.setup();
+            await webcam.setup(videoConstraints); // Pass video constraints
             await webcam.play();
             
             if (loggingInterval) {
@@ -193,7 +236,7 @@ window.init = async function() {
             updateSessionStatus();
         } catch (webcamError) {
             console.error("Webcam setup error:", webcamError);
-            alert("Unable to access webcam. Please ensure you have granted camera permissions.");
+            alert("Unable to access webcam. Please ensure you have granted camera permissions and selected a valid camera.");
             return;
         }
 
@@ -209,10 +252,10 @@ window.init = async function() {
 
         labelContainer = document.getElementById("label-container");
         if (labelContainer) {
-            labelContainer.innerHTML = ''; // Clear existing content
+            labelContainer.innerHTML = '';
             for (let i = 0; i < maxPredictions; i++) {
                 const labelDiv = document.createElement("div");
-                labelDiv.className = "label-item"; // Add a class for styling
+                labelDiv.className = "label-item";
                 labelDiv.innerHTML = `
                     <span class="label-text"></span>
                     <div class="confidence-bar-container">
@@ -340,7 +383,6 @@ function showReportPreview(analysis, reportType) {
     content.innerHTML = html;
     createPreviewCharts(analysis);
     
-    // Updated line: Store recommendations in pdfDoc
     pdfDoc = {
         analysis: analysis,
         duration: duration,
@@ -367,7 +409,6 @@ function showReportPreview(analysis, reportType) {
 
 function createPreviewCharts(analysis) {
     try {
-        // Create pie chart
         const pieCtx = document.getElementById('pieChart')?.getContext('2d');
         if (!pieCtx) {
             console.error('Could not get pie chart context');
@@ -401,7 +442,6 @@ function createPreviewCharts(analysis) {
             console.error('Error creating pie chart:', error);
         }
 
-        // Create time distribution chart
         const timeCtx = document.getElementById('timeChart')?.getContext('2d');
         if (!timeCtx) {
             console.error('Could not get time chart context');
@@ -470,7 +510,7 @@ async function predict() {
 
     for (let i = 0; i < maxPredictions; i++) {
         const classPrediction = `${prediction[i].className}: ${prediction[i].probability.toFixed(2)}`;
-        const confidence = prediction[i].probability * 100; // Convert to percentage
+        const confidence = prediction[i].probability * 100;
         
         const labelDiv = labelContainer.childNodes[i];
         if (labelDiv) {
@@ -478,7 +518,7 @@ async function predict() {
             const confidenceBar = labelDiv.querySelector('.confidence-bar');
             if (labelText && confidenceBar) {
                 labelText.textContent = classPrediction;
-                confidenceBar.style.width = `${confidence}%`; // Set bar width based on confidence
+                confidenceBar.style.width = `${confidence}%`;
             }
         }
     }
@@ -486,7 +526,6 @@ async function predict() {
     drawPose(pose);
 }
 
-// Modified logPosture function
 async function logPosture() {
     if (!model || !webcam?.canvas || !database) {
         console.log("Missing required components for logging:", {
@@ -511,7 +550,6 @@ async function logPosture() {
             (prev.probability > current.probability) ? prev : current
         );
 
-        // Only log if confidence is above threshold
         if (highestPrediction.probability > 0.5) {
             const logEntry = {
                 timestamp: timestamp,
@@ -519,10 +557,8 @@ async function logPosture() {
                 confidence: highestPrediction.probability
             };
 
-            // Add to local array
             postureLogs.push(logEntry);
             
-            // Log to Firebase
             if (isLoggingEnabled) {
                 try {
                     const logsRef = database.ref('posture-logs');
@@ -563,7 +599,6 @@ window.stopWebcam = async function() {
             labelContainer.innerHTML = '';
         }
         
-        // Clear session
         sessionStartTime = null;
         localStorage.removeItem('sessionStartTime');
         
@@ -579,7 +614,6 @@ window.stopWebcam = async function() {
 
 window.generateReport = async function() {
     try {
-        // Ensure we have the latest logs
         await loadHistoricalLogs();
         
         if (postureLogs.length === 0) {
@@ -595,7 +629,6 @@ window.generateReport = async function() {
     }
 };
 
-// PDF download function
 window.downloadPDF = function() {
     if (!pdfDoc) {
         console.error('No PDF document data available');
@@ -608,22 +641,18 @@ window.downloadPDF = function() {
         const doc = new jsPDF();
         let yOffset = 20;
 
-        // Add some styling to the PDF
         doc.setFillColor(240, 240, 240);
         doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
 
-        // Title
         doc.setFontSize(24);
         doc.setTextColor(44, 62, 80);
         doc.text("Posture Analysis Report", 20, yOffset);
         yOffset += 15;
 
-        // Duration
         doc.setFontSize(12);
         doc.text(formatDuration(pdfDoc.duration), 20, yOffset);
         yOffset += 20;
 
-        // Add color-coded posture distribution
         doc.text("Posture Distribution:", 20, yOffset);
         yOffset += 10;
 
@@ -638,7 +667,7 @@ window.downloadPDF = function() {
                 const rgb = hexToRgb(color);
                 doc.setFillColor(rgb.r, rgb.g, rgb.b);
                 doc.rect(30, yOffset - 5, 5, 5, 'F');
-                doc.setTextColor(0, 0, 0); // Reset text color to black
+                doc.setTextColor(0, 0, 0);
                 doc.text(`${posture}: ${percentage}% (${pdfDoc.analysis.postureCounts[posture] || 0} times)`, 40, yOffset);
                 yOffset += 10;
             } catch (error) {
@@ -646,7 +675,6 @@ window.downloadPDF = function() {
             }
         });
 
-        // Add charts from the preview
         const pieChart = document.getElementById('pieChart');
         const timeChart = document.getElementById('timeChart');
 
@@ -654,7 +682,6 @@ window.downloadPDF = function() {
             throw new Error('Chart elements not found');
         }
 
-        // Add pie chart
         yOffset += 10;
         try {
             doc.addImage(pieChart.toDataURL(), 'PNG', 20, yOffset, 170, 85);
@@ -663,45 +690,38 @@ window.downloadPDF = function() {
             console.error('Error adding pie chart:', error);
         }
 
-        // Check if we need a new page for the time chart
         if (yOffset + 100 > doc.internal.pageSize.height) {
             doc.addPage();
             yOffset = 20;
         }
 
-        // Add time distribution chart
         doc.text("Time Distribution:", 20, yOffset);
         yOffset += 10;
         try {
             doc.addImage(timeChart.toDataURL(), 'PNG', 20, yOffset, 170, 85);
-            yOffset += 95; // Leave space after the chart
+            yOffset += 95;
         } catch (error) {
             console.error('Error adding time chart:', error);
         }
 
-        // Add recommendations section
         if (pdfDoc.recommendations && pdfDoc.recommendations.length > 0) {
-            // Check if there's enough space; if not, add a new page
             if (yOffset + 50 > doc.internal.pageSize.height) {
                 doc.addPage();
                 yOffset = 20;
             }
 
-            // Section header
             doc.setFontSize(16);
             doc.setTextColor(44, 62, 80);
             doc.text("Recommendations:", 20, yOffset);
             yOffset += 10;
 
-            // List recommendations
             doc.setFontSize(12);
             doc.setTextColor(0, 0, 0);
             pdfDoc.recommendations.forEach((rec, index) => {
-                const lines = doc.splitTextToSize(rec, 170); // Wrap text to fit within 170 units width
+                const lines = doc.splitTextToSize(rec, 170);
                 doc.text(lines, 20, yOffset);
-                yOffset += lines.length * 10; // Adjust yOffset based on number of lines
+                yOffset += lines.length * 10;
 
-                // Add a new page if the content exceeds the page height
                 if (yOffset > doc.internal.pageSize.height - 20) {
                     doc.addPage();
                     yOffset = 20;
@@ -709,7 +729,6 @@ window.downloadPDF = function() {
             });
         }
 
-        // Save the PDF with a formatted filename
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         doc.save(`posture-analysis-${pdfDoc.reportType}-${timestamp}.pdf`);
 
@@ -720,28 +739,22 @@ window.downloadPDF = function() {
 };
 
 function hexToRgb(hex) {
-    // Handle undefined or null
     if (!hex) {
         console.warn('Invalid hex color provided');
         return { r: 0, g: 0, b: 0 };
     }
 
-    // Remove the # if present
     hex = hex.replace(/^#/, '');
     
-    // Handle different hex formats
     if (hex.length === 3) {
-        // Convert 3-digit hex to 6-digit
         hex = hex.split('').map(char => char + char).join('');
     }
     
-    // Validate hex format
     if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
         console.warn('Invalid hex color format:', hex);
         return { r: 0, g: 0, b: 0 };
     }
     
-    // Convert to RGB values
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
     const b = parseInt(hex.substring(4, 6), 16);
@@ -763,7 +776,6 @@ function calculateDuration(logs) {
     return { hours, minutes, seconds };
 }
 
-// Helper function to format duration
 function formatDuration(duration) {
     let text = "Total Session Time: ";
     if (duration.hours > 0) text += `${duration.hours} hours, `;
@@ -808,27 +820,23 @@ function createTimeIntervals(logs) {
     const endTime = new Date(logs[logs.length - 1].timestamp);
     const totalDuration = endTime - startTime;
     
-    // Determine appropriate interval
     let interval;
-    if (totalDuration <= 5 * 60 * 1000) { // Less than 5 minutes
-        interval = 15 * 1000; // 15 seconds
-    } else if (totalDuration <= 30 * 60 * 1000) { // Less than 30 minutes
-        interval = 60 * 1000; // 1 minute
-    } else if (totalDuration <= 2 * 60 * 60 * 1000) { // Less than 2 hours
-        interval = 5 * 60 * 1000; // 5 minutes
+    if (totalDuration <= 5 * 60 * 1000) {
+        interval = 15 * 1000;
+    } else if (totalDuration <= 30 * 60 * 1000) {
+        interval = 60 * 1000;
+    } else if (totalDuration <= 2 * 60 * 60 * 1000) {
+        interval = 5 * 60 * 1000;
     } else {
-        interval = 15 * 60 * 1000; // 15 minutes
+        interval = 15 * 60 * 1000;
     }
 
-    // Get unique postures from logs
     const uniquePostures = [...new Set(logs.map(log => log.posture))];
 
-    // Sort logs by timestamp
     const sortedLogs = [...logs].sort((a, b) => 
         new Date(a.timestamp) - new Date(b.timestamp)
     );
 
-    // Group logs by time intervals
     const timePoints = {};
     sortedLogs.forEach(log => {
         const logTime = new Date(log.timestamp);
@@ -844,79 +852,67 @@ function createTimeIntervals(logs) {
         timePoints[label][log.posture]++;
     });
 
-    // Convert the data into a format suitable for Chart.js
     const labels = Object.keys(timePoints).sort();
     return { labels, data: timePoints };
 }
 
-// Add formatTimeLabel function if it's not already defined
 function formatTimeLabel(date, interval) {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
     
-    if (interval < 60 * 1000) { // Less than 1 minute
+    if (interval < 60 * 1000) {
         return `${hours}:${minutes}:${seconds}`;
-    } else if (interval < 60 * 60 * 1000) { // Less than 1 hour
+    } else if (interval < 60 * 60 * 1000) {
         return `${hours}:${minutes}:${seconds}`;
     } else {
         return `${hours}:${minutes}`;
     }
 }
 
-// Variable to store the action to perform when confirmed
 let confirmCallback = null;
 
-// Function to open the modal with a custom message
 function openConfirmModal(message, callback) {
     const modal = document.getElementById('confirm-modal');
     const messageElement = document.getElementById('confirm-message');
     if (modal && messageElement) {
-        messageElement.textContent = message; // Set the custom message
-        confirmCallback = callback; // Store the action to perform
-        modal.style.display = 'flex'; // Show the modal
+        messageElement.textContent = message;
+        confirmCallback = callback;
+        modal.style.display = 'flex';
     }
 }
 
-// Function to close the modal
 window.closeConfirmModal = function() {
     const modal = document.getElementById('confirm-modal');
     if (modal) {
-        modal.style.display = 'none'; // Hide the modal
-        confirmCallback = null; // Clear the callback
+        modal.style.display = 'none';
+        confirmCallback = null;
     }
 }
 
-// Function to execute the confirmed action
 window.confirmAction = function() {
     if (confirmCallback) {
-        confirmCallback(); // Run the stored action
+        confirmCallback();
     }
-    closeConfirmModal(); // Close the modal
+    closeConfirmModal();
 }
 
-// Updated clearLogs function using the custom modal
 window.clearLogs = function() {
     openConfirmModal('Are you sure you want to clear logs? This action is irreversible.', async function() {
         try {
-            // Clear Firebase database (assuming you’re using Firebase)
             await database.ref('posture-logs').set(null);
             
-            // Clear local data
             postureLogs = [];
             sessionStartTime = null;
             localStorage.removeItem('sessionStartTime');
             
-            // Clear UI elements
             if (labelContainer) {
                 // labelContainer.innerHTML = '';
             }
             
-            // Optional: Show a success message (could use another modal here)
             console.log('All logs cleared successfully! (Denied Write permissions for now)');
         } catch (error) {
             console.error('Error clearing logs:', error);
-            // Optional: Show an error message
             console.log('Error clearing logs. Please try again.');
         }
     });
@@ -948,7 +944,6 @@ function updateSessionStatus() {
     }
 }
 
-// Automatic error recovery for Firebase operations
 async function retryOperation(operation, maxAttempts = 3) {
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
@@ -973,7 +968,7 @@ function findSustainedPoorPostures(logs, minDurationMs = 5 * 60 * 1000) {
         if (posture !== 'Neutral') {
             if (currentPosture === posture && i > 0) {
                 const prevTime = new Date(logs[i - 1].timestamp).getTime();
-                if (timestamp - prevTime < 2000) { // Consider logs <2s apart as consecutive
+                if (timestamp - prevTime < 2000) {
                     if (timestamp - startTime >= minDurationMs) {
                         sustainedPeriods.push(posture);
                     }
@@ -990,30 +985,26 @@ function findSustainedPoorPostures(logs, minDurationMs = 5 * 60 * 1000) {
             startTime = null;
         }
     }
-    return [...new Set(sustainedPeriods)]; // Unique sustained postures
+    return [...new Set(sustainedPeriods)];
 }
 
 function generateRecommendations(analysis) {
     const { posturePercentages, sustainedPoorPostures } = analysis;
     const recommendations = [];
 
-    // Neutral posture feedback
     if (posturePercentages['Neutral'] > 70) {
         recommendations.push("Great job maintaining a neutral posture most of the time!");
     } else {
         recommendations.push("Try to maintain a neutral posture more consistently.");
     }
 
-    // Identify dominant poor postures (>20%)
     const dominantPoorPostures = Object.keys(posturePercentages)
         .filter(p => p !== 'Neutral' && posturePercentages[p] > 20);
 
-    // Specific advice for dominant postures
     dominantPoorPostures.forEach(posture => {
         recommendations.push(getPostureAdvice(posture));
     });
 
-    // Combined advice for specific mixes
     if (dominantPoorPostures.includes('Slouched Forward') && dominantPoorPostures.includes('Head Dropping')) {
         recommendations.push("You often slouch forward and let your head drop, which can significantly strain your neck and back. Sit up straight, align your head with your spine, and consider a chair with better support or frequent stretch breaks.");
     } else if (dominantPoorPostures.includes('Slouched Sidewards') && dominantPoorPostures.includes('Chair Lean')) {
@@ -1022,12 +1013,10 @@ function generateRecommendations(analysis) {
         recommendations.push("Crossing your legs while leaning back may lead to discomfort and poor circulation. Keep both feet flat on the floor and sit upright with lumbar support.");
     }
 
-    // Sustained posture advice
     if (sustainedPoorPostures.length > 0) {
         recommendations.push("You maintained poor posture for extended periods. Set reminders every 20-30 minutes to check your posture or take short stretch breaks.");
     }
 
-    // General tips
     recommendations.push("Take regular breaks to stretch and move around every hour.");
     recommendations.push("Ensure your chair and desk are ergonomically set up to support your back and neck.");
 

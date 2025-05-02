@@ -25,6 +25,9 @@
             <canvas id="canvas"></canvas>
         </div>
         <div class="control-buttons">
+            <select id="camera-select" onchange="updateSelectedCamera()">
+                <option value="">Select Camera</option>
+            </select>
             <button onclick="init()">Open Camera</button>
             <button onclick="stopWebcam()">Close Camera</button>
             <button id="toggle-logging-btn" class="disabled" onclick="toggleLogging()">Enable Logging</button>

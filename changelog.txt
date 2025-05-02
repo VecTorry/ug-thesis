@@ -1,4 +1,21 @@
-Version 1.01:
+Version 1.1.0:
+
+
+Webpage link:   https://ug-thesis-fb.web.app/
+Firebase link:  https://console.firebase.google.com/project/ug-thesis-fb/overview
+
+CHANGES:
+- Added camera selection option
+
+
+NOTE:
+- Quick minor update couple hours before system defense presentation without documentation.
+
+
+================================================================================
+
+
+Version 1.0.1:
 
 
 Webpage link:   https://ug-thesis-fb.web.app/

@@ -432,3 +432,18 @@ button:hover {
     background-color: #3a3a3a;
     color: #ccc;
 }
+
+/*Select Camera*/
+#camera-select {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    cursor: pointer;
+}
+.dark-mode #camera-select {
+    background-color: #3a3a3a;
+    color: #fff;
+    border-color: #555;
+}
